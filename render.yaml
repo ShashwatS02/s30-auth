@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: s30-auth-api
+    env: node
+    rootDir: api
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
