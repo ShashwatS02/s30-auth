@@ -1,4 +1,5 @@
 import express from "express";
+import { pool } from "./db";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -17,6 +18,11 @@ app.get("/health", (_req, res) => {
 
 app.post("/debug/echo", (req, res) => {
   res.status(200).json({ youSent: req.body });
+});
+
+app.get("/debug/db", async (_req, res) => {
+  const result = await pool.query("select now() as now");
+  res.json({ dbTime: result.rows[0].now });
 });
 
 // Start server (keep this last)
