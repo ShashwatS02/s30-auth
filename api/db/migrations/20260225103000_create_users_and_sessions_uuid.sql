@@ -1,15 +1,17 @@
 -- migrate:up
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 create table users (
-  id bigint generated always as identity primary key,
+  id uuid primary key default gen_random_uuid(),
   email text not null unique,
   password_hash text not null,
   created_at timestamptz not null default now()
 );
 
 create table sessions (
-  id bigint generated always as identity primary key,
-  user_id bigint not null references users(id) on delete cascade,
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
   refresh_token_hash text not null,
   created_at timestamptz not null default now(),
   revoked_at timestamptz
