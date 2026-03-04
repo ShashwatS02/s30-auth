@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { isValidEmail, isValidPassword } from "./validation";
 import cookieParser from "cookie-parser";
 import { signAccessToken, makeRefreshToken, sha256Hex } from "./auth";
+import { authRequired } from "./middleware/authRequired";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -28,6 +29,22 @@ app.post("/debug/echo", (req, res) => {
 app.get("/debug/db", async (_req, res) => {
   const result = await pool.query("select now() as now");
   res.json({ dbTime: result.rows[0].now });
+});
+
+app.get("/me", authRequired, async (req, res) => {
+  const userId = (req as any).auth.userId as string;
+
+  const result = await pool.query(
+    `select id, email, created_at
+     from users
+     where id = $1`,
+    [userId]
+  );
+
+  if (result.rowCount === 0) return res.status(404).json({ error: "User not found" });
+
+  const u = result.rows[0];
+  return res.json({ user: { id: u.id, email: u.email, createdAt: u.created_at } });
 });
 
 app.post("/auth/register", async (req, res) => {
@@ -169,6 +186,21 @@ app.post("/auth/logout", async (req, res) => {
   res.clearCookie("refresh_token", { path: "/auth/refresh" });
   return res.status(204).send();
 });
+
+app.post("/auth/logout-all", authRequired, async (req, res) => {
+  const userId = (req as any).auth.userId as string;
+
+  await pool.query(
+    `update sessions
+     set revoked_at = now()
+     where user_id = $1 and revoked_at is null`,
+    [userId]
+  );
+
+  res.clearCookie("refresh_token", { path: "/auth/refresh" });
+  return res.status(204).send();
+});
+
 
 
 
