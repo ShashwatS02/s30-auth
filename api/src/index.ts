@@ -5,9 +5,11 @@ import { isValidEmail, isValidPassword } from "./validation";
 import cookieParser from "cookie-parser";
 import { signAccessToken, makeRefreshToken, sha256Hex } from "./auth";
 import { authRequired } from "./middleware/authRequired";
+import { loginLimiter, refreshLimiter } from "./middleware/rateLimiters";
 
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 // Middleware (runs before routes)
@@ -89,7 +91,7 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-app.post("/auth/login", async (req, res) => {
+app.post("/auth/login", loginLimiter, async (req, res) => {
   const email = String(req.body?.email ?? "").trim();
   const password = String(req.body?.password ?? "");
 
@@ -128,7 +130,7 @@ app.post("/auth/login", async (req, res) => {
   return res.status(200).json({ accessToken, sessionId: sessionRes.rows[0].id });
 });
 
-app.post("/auth/refresh", async (req, res) => {
+app.post("/auth/refresh", refreshLimiter, async (req, res) => {
   const token = String(req.cookies?.refresh_token ?? "");
   if (!token) return res.status(401).json({ error: "Missing refresh token" });
 
@@ -205,9 +207,6 @@ app.post("/auth/logout-all", authRequired, async (req, res) => {
   res.clearCookie("refresh_token", { path: "/auth/refresh" });
   return res.status(204).send();
 });
-
-
-
 
 // Start server (keep this last)
 app.listen(PORT, () => {

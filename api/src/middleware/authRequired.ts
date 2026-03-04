@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_ISSUER, JWT_AUDIENCE } from "../auth";
 import { sendBearer401 } from "../http/unauthorized";
 
+
 function mustGetEnv(name: string): string {
   const v = process.env[name];
   if (!v) throw new Error(`${name} missing`);
