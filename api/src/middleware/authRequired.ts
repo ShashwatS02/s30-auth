@@ -1,4 +1,4 @@
-import type { Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_ISSUER, JWT_AUDIENCE } from "../auth";
 
@@ -10,7 +10,7 @@ function mustGetEnv(name: string): string {
 
 const JWT_SECRET = mustGetEnv("JWT_SECRET");
 
-export function authRequired(req: Express.Request, res: Response, next: NextFunction) {
+export function authRequired(req: Request, res: Response, next: NextFunction) {
   const h = req.headers.authorization;
   if (!h || !h.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Missing bearer token" });
