@@ -1,24 +1,37 @@
-import { rateLimit } from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-const json429 = (code: string, message: string) => ({ error: { code, message } });
+const ipPlusEmail = (req: any) => {
+  const email = String(req.body?.email ?? "").trim().toLowerCase();
+  const ipKey = ipKeyGenerator(req.ip); // important for IPv6-safe limiting
+  return `${ipKey}|${email || "no-email"}`;
+};
 
-export const loginLimiter = rateLimit({
-  windowMs: 60_000,       // 1 minute
-  limit: 10,              // tune as you like
-  standardHeaders: "draft-8",
+// Broad per-IP throttle (high-volume abuse)
+export const loginIpLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60,
+  standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true,
-  handler: (_req, res) => {
-    res.status(429).json(json429("rate_limited", "Too many login attempts. Try again soon."));
-  },
+  skipSuccessfulRequests: true, // only count failed login attempts
+  handler: (_req, res) => res.status(429).json({ error: "Too many login attempts. Try again later." }),
 });
 
-export const refreshLimiter = rateLimit({
-  windowMs: 60_000,
-  limit: 30,
-  standardHeaders: "draft-8",
+// Targeted account protection (same IP hammering one email)
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  keyGenerator: ipPlusEmail,
+  standardHeaders: true,
   legacyHeaders: false,
-  handler: (_req, res) => {
-    res.status(429).json(json429("rate_limited", "Too many refresh attempts. Try again soon."));
-  },
+  skipSuccessfulRequests: true, // only count failed login attempts
+  handler: (_req, res) => res.status(429).json({ error: "Too many login attempts. Try again later." }),
+});
+
+// Refresh can stay per-IP (tune separately)
+export const refreshLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => res.status(429).json({ error: "Too many refresh requests. Try again later." }),
 });

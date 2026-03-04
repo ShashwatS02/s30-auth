@@ -5,7 +5,7 @@ import { isValidEmail, isValidPassword } from "./validation";
 import cookieParser from "cookie-parser";
 import { signAccessToken, makeRefreshToken, sha256Hex } from "./auth";
 import { authRequired } from "./middleware/authRequired";
-import { loginLimiter, refreshLimiter } from "./middleware/rateLimiters";
+import { loginLimiter, loginIpLimiter, refreshLimiter } from "./middleware/rateLimiters";
 
 
 const app = express();
@@ -91,7 +91,7 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-app.post("/auth/login", loginLimiter, async (req, res) => {
+app.post("/auth/login", loginIpLimiter, loginLimiter, async (req, res) => {
   const email = String(req.body?.email ?? "").trim();
   const password = String(req.body?.password ?? "");
 
