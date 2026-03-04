@@ -54,16 +54,6 @@ app.get("/protected/ping", authRequired, (req, res) => {
   res.json({ ok: true, userId: req.auth.userId });
 });
 
-app.get("/debug/ip", (req, res) => {
-  res.json({
-    ip: req.ip,
-    ips: (req as any).ips,
-    remoteAddress: req.socket.remoteAddress,
-    xForwardedFor: req.headers["x-forwarded-for"],
-    cfConnectingIp: req.headers["cf-connecting-ip"],
-  });
-});
-
 
 app.post("/auth/register", async (req, res) => {
   const email = String(req.body?.email ?? "").trim();
