@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { signAccessToken, makeRefreshToken, sha256Hex } from "./auth";
 import { authRequired } from "./middleware/authRequired";
 
+
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
@@ -45,6 +46,10 @@ app.get("/me", authRequired, async (req, res) => {
 
   const u = result.rows[0];
   return res.json({ user: { id: u.id, email: u.email, createdAt: u.created_at } });
+});
+
+app.get("/protected/ping", authRequired, (req, res) => {
+  res.json({ ok: true, userId: req.auth.userId });
 });
 
 app.post("/auth/register", async (req, res) => {
