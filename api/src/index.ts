@@ -9,7 +9,7 @@ import { loginLimiter, loginIpLimiter, refreshLimiter } from "./middleware/rateL
 
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", 2);
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 // Middleware (runs before routes)
