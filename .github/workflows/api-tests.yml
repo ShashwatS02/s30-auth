@@ -2,7 +2,7 @@ name: API tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -12,25 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      - name: Debug paths
-        run: |
-          pwd
-          ls -la
-          ls -la api
-          cat api/package.json
-
-            - name: Install deps
+      - name: Install deps
         run: npm --prefix api ci
 
       - name: Run tests
+        run: npm --prefix api test
         env:
           DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
-        run: npm --prefix api test
-
