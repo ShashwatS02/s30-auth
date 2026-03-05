@@ -6,10 +6,23 @@ import cookieParser from "cookie-parser";
 import { signAccessToken, makeRefreshToken, sha256Hex } from "./auth";
 import { authRequired } from "./middleware/authRequired";
 import { loginLimiter, loginIpLimiter, refreshLimiter } from "./middleware/rateLimiters";
-
+import { makeApp } from "./app";
 
 const app = express();
-app.set("trust proxy", 4);
+app.disable("x-powered-by");
+if (process.env.NODE_ENV === "production") {
+  // Render behind Cloudflare: trust proxy hops so req.ip resolves to real client IP
+  app.set("trust proxy", 4);
+}
+
+import { makeApp } from "./app";
+
+const app = makeApp();
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+
+app.listen(PORT, () => console.log(`API listening on port ${PORT}`));
+
+
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 // Middleware (runs before routes)
@@ -25,14 +38,13 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ ok: true });
 });
 
-app.post("/debug/echo", (req, res) => {
-  res.status(200).json({ youSent: req.body });
-});
-
-app.get("/debug/db", async (_req, res) => {
-  const result = await pool.query("select now() as now");
-  res.json({ dbTime: result.rows[0].now });
-});
+if (process.env.NODE_ENV !== "production") {
+  app.post("/debug/echo", (req, res) => res.status(200).json({ youSent: req.body }));
+  app.get("/debug/db", async (_req, res) => {
+    const result = await pool.query("select now() as now");
+    res.json({ dbTime: result.rows[0].now });
+  });
+}
 
 app.get("/me", authRequired, async (req, res) => {
   const userId = (req as any).auth.userId as string;
@@ -66,7 +78,8 @@ app.post("/auth/register", async (req, res) => {
     return res.status(400).json({ error: "Password must be 10+ chars and include 1 number + 1 special char" });
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  const rounds = process.env.NODE_ENV === "test" ? 4 : 12;
+const passwordHash = await bcrypt.hash(password, rounds);
 
   try {
     const result = await pool.query(
