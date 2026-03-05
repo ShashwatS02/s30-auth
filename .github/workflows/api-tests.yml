@@ -9,10 +9,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: api
-
     steps:
       - uses: actions/checkout@v4
 
@@ -23,10 +19,19 @@ jobs:
           cache: npm
           cache-dependency-path: api/package-lock.json
 
+      - name: Debug paths
+        run: |
+          pwd
+          ls -la
+          ls -la api
+          cat api/package.json
+
       - name: Install deps
         run: npm ci
+        working-directory: api
 
       - name: Run tests
+        run: npm test
+        working-directory: api
         env:
           DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
-        run: npm test
