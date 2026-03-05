@@ -26,12 +26,11 @@ jobs:
           ls -la api
           cat api/package.json
 
-      - name: Install deps
-        run: npm ci
-        working-directory: api
+            - name: Install deps
+        run: npm --prefix api ci
 
       - name: Run tests
-        run: npm test
-        working-directory: api
         env:
           DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
+        run: npm --prefix api test
+
