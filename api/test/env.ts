@@ -1,3 +1,7 @@
+import fs from "fs";
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.test" });
+
+if (fs.existsSync(".env.test")) {
+  dotenv.config({ path: ".env.test" });
+}
 process.env.NODE_ENV = "test";
