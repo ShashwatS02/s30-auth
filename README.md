@@ -296,11 +296,11 @@ GET    /health
 
 ## 🖼️ Screenshots
 
-- [Login page](./screenshots/Login_image.png)
+![Login page](./screenshots/Login_image.png)
   
-- [Signup page](./screenshots/Signup_image.png)
+![Signup page](./screenshots/Signup_image.png)
   
-- [Authenticated dashboard](./screenshots/Dashboard.png)
+![Authenticated dashboard](./screenshots/Dashboard.png)
   
 ---
 
