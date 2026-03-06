@@ -1,3 +1,4 @@
+import "./env";
 import { Pool } from "pg";
 
 const connectionString =
