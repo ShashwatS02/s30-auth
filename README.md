@@ -296,12 +296,12 @@ GET    /health
 
 ## 🖼️ Screenshots
 
-![Login page](./screenshots/Login_image.png)
+<img src="./screenshots/Login_image.png" alt="Login page" width="600" />
   
-![Signup page](./screenshots/Signup_image.png)
-  
-![Authenticated dashboard](./screenshots/Dashboard.png)
-  
+<img src="./screenshots/Signup_image.png" alt="Signup page" width="600" />
+
+<img src="./screenshots/Dashboard.png" alt="Authenticated dashboard" width="600" />
+
 ---
 
 ## 📚 What I Learned
